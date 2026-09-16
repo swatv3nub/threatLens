@@ -1,0 +1,14 @@
+{
+  "id": "syn-008",
+  "rule_name": "Lateral movement via SMB",
+  "severity": "high",
+  "category": "lateral_movement",
+  "source_ip": "10.1.20.31",
+  "destination_ip": "10.1.20.99",
+  "hostname": "workstation-eng-11",
+  "username": "svc_backup",
+  "process_name": "psexesvc.exe",
+  "destination_port": 445,
+  "protocol": "tcp",
+  "timestamp": "2026-09-16T02:18:38.702646+00:00"
+}

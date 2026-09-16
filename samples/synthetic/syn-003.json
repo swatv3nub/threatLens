@@ -1,0 +1,10 @@
+{
+  "id": "syn-003",
+  "rule_name": "Known malicious file hash detected",
+  "severity": "critical",
+  "category": "malware",
+  "hostname": "fileserver-02",
+  "file_hash": "44d88612fea8a8f36de82e1278abb02f00000000000000000000000000000000",
+  "process_name": "svchost.exe",
+  "timestamp": "2026-09-16T02:08:38.702646+00:00"
+}

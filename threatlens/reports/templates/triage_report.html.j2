@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ThreatLens Report {{ triage.triage_id }}</title>
+<style>
+  @page { size: A4; margin: 18mm; }
+  body { font-family: "Helvetica Neue", Arial, sans-serif; color: #1a1f2b; font-size: 11px; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: 0.5px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+       border-bottom: 1px solid #d8dde6; padding-bottom: 4px; margin: 18px 0 8px; }
+  .sub { color: #5a6472; font-size: 10px; }
+  .banner { display: flex; gap: 10px; margin: 12px 0; }
+  .pill { border-radius: 4px; padding: 6px 10px; font-weight: 600; color: #fff; font-size: 10px; }
+  .sev-critical { background: #a4001c; }
+  .sev-high { background: #d2451e; }
+  .sev-medium { background: #c98a00; }
+  .sev-low { background: #2b7a3d; }
+  .sev-informational { background: #4a5568; }
+  .cls-tp { background: #a4001c; }
+  .cls-fp { background: #2b7a3d; }
+  .cls-ni { background: #b5651d; }
+  .cls-benign { background: #2b6cb0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #e6eaf0; vertical-align: top; }
+  th { background: #f4f6fa; font-size: 10px; text-transform: uppercase; color: #4a5568; }
+  .evidence-id { font-family: monospace; color: #2b6cb0; }
+  .muted { color: #5a6472; }
+  .actions li { margin-bottom: 6px; }
+  .footer { margin-top: 24px; border-top: 1px solid #d8dde6; padding-top: 8px;
+            font-size: 9px; color: #8a93a3; }
+</style>
+</head>
+<body>
+  <h1>ThreatLens Analysis Report</h1>
+  <div class="sub">
+    Triage ID: {{ triage.triage_id }} &nbsp;|&nbsp;
+    Alert ID: {{ triage.alert_id }} &nbsp;|&nbsp;
+    Agent run: {{ triage.agent_run_id }} &nbsp;|&nbsp;
+    Generated: {{ triage.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}
+  </div>
+
+  <div class="banner">
+    <span class="pill cls-{{ 'tp' if triage.classification.value == 'true_positive' else 'fp' if triage.classification.value == 'false_positive' else 'ni' if triage.classification.value == 'needs_investigation' else 'benign' }}">
+      {{ triage.classification.value.replace('_', ' ').upper() }}
+    </span>
+    <span class="pill sev-{{ triage.severity.value }}">
+      SEVERITY: {{ triage.severity.value.upper() }}
+    </span>
+    <span class="pill sev-informational">
+      CONFIDENCE: {{ "%.0f"|format(triage.confidence * 100) }}%
+    </span>
+  </div>
+
+  <h2>Executive Summary</h2>
+  <p>{{ triage.summary }}</p>
+  <p class="muted">
+    Human review required: {{ "YES" if triage.requires_human_review else "NO" }} &nbsp;|&nbsp;
+    Action executed: {{ triage.action_executed.upper() }}
+  </p>
+
+  <h2>Alert Metadata</h2>
+  <table>
+    <tr><th>Source</th><td>{{ alert.source.value }}</td><th>Rule</th><td>{{ alert.rule_name or "-" }}</td></tr>
+    <tr><th>Severity hint</th><td>{{ alert.severity.value }}</td><th>Category</th><td>{{ alert.category or "-" }}</td></tr>
+    <tr><th>Host</th><td>{{ alert.hostname or "-" }}</td><th>User</th><td>{{ alert.username or "-" }}</td></tr>
+    <tr><th>Source IP</th><td>{{ alert.source_ip or "-" }}</td><th>Destination IP</th><td>{{ alert.destination_ip or "-" }}</td></tr>
+    <tr><th>Domain</th><td>{{ alert.domain or "-" }}</td><th>File hash</th><td>{{ alert.file_hash or "-" }}</td></tr>
+    <tr><th>Process</th><td colspan="3">{{ alert.process_name or "-" }}</td></tr>
+    <tr><th>Command line</th><td colspan="3">{{ alert.command_line or "-" }}</td></tr>
+  </table>
+
+  <h2>Key Evidence</h2>
+  <table>
+    <tr><th>ID</th><th>Source</th><th>Finding</th><th>Conf.</th></tr>
+    {% for ev in triage.evidence %}
+    <tr>
+      <td class="evidence-id">{{ ev.id }}</td>
+      <td>{{ ev.source }}</td>
+      <td>{{ ev.finding }}</td>
+      <td>{{ "%.0f"|format(ev.confidence * 100) }}%</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No evidence recorded.</td></tr>
+    {% endfor %}
+  </table>
+
+  {% if triage.mitre_attack %}
+  <h2>MITRE ATT&amp;CK</h2>
+  <ul>
+    {% for tech in triage.mitre_attack %}<li>{{ tech }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <h2>Recommended Actions (not executed)</h2>
+  <ol class="actions">
+    {% for act in triage.recommended_actions %}
+    <li><strong>{{ act.action }}</strong> — {{ act.rationale }}
+      <span class="muted">(priority {{ act.priority }}, human approval required)</span></li>
+    {% else %}
+    <li class="muted">No actions recommended.</li>
+    {% endfor %}
+  </ol>
+
+  {% if triage.uncertainties %}
+  <h2>Uncertainty</h2>
+  <ul>
+    {% for u in triage.uncertainties %}<li>{{ u }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if triage.policy_adjustments %}
+  <h2>Policy Adjustments</h2>
+  <ul>
+    {% for adj in triage.policy_adjustments %}<li>{{ adj }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if tool_calls %}
+  <h2>Tool Execution Summary</h2>
+  <table>
+    <tr><th>Tool</th><th>Success</th><th>Latency (ms)</th><th>Summary</th></tr>
+    {% for call in tool_calls %}
+    <tr>
+      <td>{{ call.tool_name }}</td>
+      <td>{{ "yes" if call.success else "no" }}</td>
+      <td>{{ "%.1f"|format(call.latency_ms) }}</td>
+      <td>{{ call.result_summary or call.error or "-" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if audit_events %}
+  <h2>Audit Trail</h2>
+  <table>
+    <tr><th>Timestamp</th><th>Event</th></tr>
+    {% for event in audit_events %}
+    <tr><td>{{ event.timestamp }}</td><td>{{ event.event_type }}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <div class="footer">
+    ThreatLens produces analyst assistance only. All recommended actions require
+    human approval and were not executed automatically. Confidence values are heuristic
+    and are not calibrated probabilities.
+  </div>
+</body>
+</html>

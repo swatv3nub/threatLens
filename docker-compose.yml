@@ -1,0 +1,18 @@
+services:
+  threatlens:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      LLM_PROVIDER: mock
+      MOCK_ENRICHMENT: "true"
+      DATABASE_URL: sqlite:///./data/threatlens.db
+      ENABLE_PDF_REPORTS: "true"
+      BACKUP_DIR: /app/data/backups
+    volumes:
+      - sentinel-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  sentinel-data:

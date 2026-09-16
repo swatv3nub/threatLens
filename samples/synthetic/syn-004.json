@@ -1,0 +1,11 @@
+{
+  "id": "syn-004",
+  "rule_name": "Failed login brute force",
+  "severity": "medium",
+  "category": "authentication",
+  "source_ip": "198.51.100.23",
+  "destination_ip": "10.1.10.5",
+  "hostname": "vpn-gateway-01",
+  "username": "administrator",
+  "timestamp": "2026-09-16T02:30:38.702646+00:00"
+}

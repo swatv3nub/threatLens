@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-16T10:15:00.000Z",
+  "rule": {
+    "id": "5710",
+    "level": 12,
+    "description": "Multiple authentication failures followed by success",
+    "groups": ["authentication_failed", "authentication_success"]
+  },
+  "agent": {"id": "003", "name": "vpn-gateway-01"},
+  "data": {
+    "srcip": "198.51.100.23",
+    "dstip": "10.1.10.5",
+    "srcuser": "administrator",
+    "protocol": "ssh"
+  }
+}

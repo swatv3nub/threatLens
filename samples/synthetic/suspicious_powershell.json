@@ -1,0 +1,11 @@
+{
+  "id": "syn-002",
+  "rule_name": "Suspicious PowerShell execution",
+  "severity": "high",
+  "category": "execution",
+  "hostname": "workstation-fin-07",
+  "username": "j.doe",
+  "process_name": "powershell.exe",
+  "command_line": "powershell.exe -nop -w hidden -enc SQBFAFgA",
+  "metadata": {"scenario": "suspicious PowerShell execution"}
+}

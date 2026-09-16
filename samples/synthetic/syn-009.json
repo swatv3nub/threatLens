@@ -1,0 +1,12 @@
+{
+  "id": "syn-009",
+  "rule_name": "Suspicious web request",
+  "severity": "medium",
+  "category": "web",
+  "hostname": "web-proxy-01",
+  "source_ip": "10.1.40.18",
+  "url": "http://evil-c2.example.invalid/payload.bin",
+  "domain": "evil-c2.example.invalid",
+  "protocol": "http",
+  "timestamp": "2026-09-16T02:32:38.702646+00:00"
+}

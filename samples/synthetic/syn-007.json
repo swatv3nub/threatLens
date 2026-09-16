@@ -1,0 +1,11 @@
+{
+  "id": "syn-007",
+  "rule_name": "Internal monitoring healthcheck",
+  "severity": "informational",
+  "category": "monitoring",
+  "source_ip": "10.0.0.77",
+  "destination_ip": "10.1.10.20",
+  "hostname": "monitor-01",
+  "domain": "updates.example.com",
+  "timestamp": "2026-09-16T02:37:38.702646+00:00"
+}

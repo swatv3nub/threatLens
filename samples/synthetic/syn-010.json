@@ -1,0 +1,10 @@
+{
+  "id": "syn-010",
+  "rule_name": "Ambiguous authentication anomaly",
+  "severity": "medium",
+  "category": "authentication",
+  "hostname": "workstation-mkt-04",
+  "username": "a.smith",
+  "source_ip": "10.1.50.44",
+  "timestamp": "2026-09-16T02:23:38.702646+00:00"
+}

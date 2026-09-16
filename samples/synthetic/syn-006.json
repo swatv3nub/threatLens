@@ -1,0 +1,10 @@
+{
+  "id": "syn-006",
+  "rule_name": "Vulnerability scanner activity",
+  "severity": "low",
+  "category": "scanning",
+  "source_ip": "192.0.2.50",
+  "destination_ip": "10.1.10.10",
+  "hostname": "scan-runner-01",
+  "timestamp": "2026-09-16T01:53:38.702646+00:00"
+}

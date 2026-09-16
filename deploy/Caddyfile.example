@@ -1,0 +1,3 @@
+{$THREATLENS_DOMAIN} {
+    reverse_proxy threatlens:8000
+}

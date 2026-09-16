@@ -1,0 +1,12 @@
+{
+  "id": "syn-001",
+  "rule_name": "Outbound connection to known malicious IP",
+  "severity": "high",
+  "category": "command_and_control",
+  "source_ip": "10.1.20.15",
+  "destination_ip": "203.0.113.66",
+  "destination_port": 8443,
+  "protocol": "tcp",
+  "hostname": "payments-prod-01",
+  "metadata": {"scenario": "obvious malicious IP connection"}
+}

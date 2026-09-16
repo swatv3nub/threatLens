@@ -1,0 +1,15 @@
+{
+  "_index": "siem-alerts-2026.09",
+  "_id": "abc123",
+  "_source": {
+    "@timestamp": "2026-09-16T10:25:00.000Z",
+    "event": {"kind": "alert", "category": "process", "severity": "high"},
+    "rule": {"id": "rule-42", "name": "Encoded PowerShell", "category": "execution"},
+    "host": {"hostname": "workstation-fin-07"},
+    "user": {"name": "j.doe"},
+    "process": {
+      "name": "powershell.exe",
+      "command_line": "powershell.exe -nop -w hidden -enc SQBFAFgA"
+    }
+  }
+}

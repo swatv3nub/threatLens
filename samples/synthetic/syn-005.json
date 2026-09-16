@@ -1,0 +1,12 @@
+{
+  "id": "syn-005",
+  "rule_name": "Suspicious DNS query",
+  "severity": "medium",
+  "category": "dns",
+  "hostname": "workstation-hr-03",
+  "source_ip": "10.1.30.22",
+  "domain": "evil-c2.example.invalid",
+  "destination_port": 53,
+  "protocol": "udp",
+  "timestamp": "2026-09-16T02:35:38.702646+00:00"
+}

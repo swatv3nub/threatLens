@@ -1,0 +1,63 @@
+services:
+  threatlens:
+    build: .
+    expose:
+      - "8000"
+    environment:
+      APP_ENV: production
+      API_AUTH_ENABLED: "true"
+      API_KEY: ${THREATLENS_API_KEY:?Set THREATLENS_API_KEY}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      MOCK_ENRICHMENT: "false"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY}
+      VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY:?Set VIRUSTOTAL_API_KEY}
+      ABUSEIPDB_API_KEY: ${ABUSEIPDB_API_KEY:?Set ABUSEIPDB_API_KEY}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+      DATABASE_AUTO_CREATE: "false"
+      RATE_LIMIT_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      OTEL_ENABLED: ${OTEL_ENABLED:-false}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      RETENTION_DAYS: ${RETENTION_DAYS:-90}
+      BACKUP_DIR: /app/backups
+      WORKERS: ${WORKERS:-2}
+    volumes:
+      - threatlens-backups:/app/backups
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["sh", "-c", "alembic upgrade head && uvicorn threatlens.api.app:app --host 0.0.0.0 --port 8000 --workers $${WORKERS:-2}"]
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      THREATLENS_DOMAIN: ${THREATLENS_DOMAIN:?Set THREATLENS_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile.example:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - threatlens
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  threatlens-backups:
+  caddy-data:
+  caddy-config:
+  redis-data:

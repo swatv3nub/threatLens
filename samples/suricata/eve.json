@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-09-16T10:20:00.000Z",
+  "event_type": "alert",
+  "src_ip": "10.1.20.15",
+  "dest_ip": "203.0.113.66",
+  "src_port": 51234,
+  "dest_port": 8443,
+  "proto": "TCP",
+  "flow_id": 1234567890,
+  "alert": {
+    "action": "allowed",
+    "signature_id": "2010935",
+    "signature": "ET MALWARE Known C2 Beacon",
+    "category": "A Network Trojan was detected",
+    "severity": 1
+  }
+}
