@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import Depends, Header, HTTPException, Request, status
 
 from threatlens.container import Container, get_container
-from threatlens.observability.logging import request_id_var
 from threatlens.security.auth import Role, get_principal
 from threatlens.security.rate_limiter import RateLimitExceeded
 
@@ -38,15 +37,3 @@ def require_role(required: Role) -> Callable[[], Awaitable[None]]:
             )
 
     return dependency
-
-
-async def set_request_context(
-    x_request_id: str | None = Header(default=None, alias="X-Request-Id"),
-) -> AsyncIterator[None]:
-    from uuid import uuid4
-
-    token = request_id_var.set(x_request_id or str(uuid4()))
-    try:
-        yield
-    finally:
-        request_id_var.reset(token)

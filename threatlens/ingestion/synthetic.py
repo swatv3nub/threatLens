@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from threatlens.ingestion.base import IngestionError, register_ingestor
+from threatlens.ingestion.base import IngestionError, parse_timestamp, register_ingestor
 from threatlens.models.alerts import AlertSource, NormalizedAlert, Severity
 
 MALICIOUS_IP = "203.0.113.66"
@@ -26,7 +26,7 @@ class SyntheticIngestor:
         alert = NormalizedAlert(
             source=AlertSource.synthetic,
             id=raw.get("id") or NormalizedAlert(source=AlertSource.synthetic).id,
-            timestamp=self._parse_timestamp(raw.get("timestamp")),
+            timestamp=parse_timestamp(raw.get("timestamp")),
             rule_id=raw.get("rule_id"),
             rule_name=raw.get("rule_name") or raw.get("name"),
             severity=_severity(raw.get("severity")),
@@ -47,16 +47,6 @@ class SyntheticIngestor:
             metadata=raw.get("metadata") or {},
         )
         return alert
-
-    @staticmethod
-    def _parse_timestamp(value: Any) -> datetime:
-        if isinstance(value, str):
-            try:
-                return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except ValueError:
-                pass
-        return datetime.now(UTC)
-
 
 def _severity(value: Any) -> Severity:
     if isinstance(value, Severity):

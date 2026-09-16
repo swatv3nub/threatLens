@@ -11,7 +11,6 @@ from threatlens.security.audit import AuditEvent
 from threatlens.security.auth import tenant_id as current_tenant_id
 from threatlens.storage.database import Database
 from threatlens.storage.models import (
-    AgentRunRow,
     AlertRow,
     AssetRow,
     AuditEventRow,
@@ -330,25 +329,6 @@ class ToolCallRepository:
             ]
 
 
-class AgentRunRepository:
-    def __init__(self, db: Database) -> None:
-        self._db = db
-
-    def save(
-        self, *, run_id: str, alert_id: str, final_state: str, payload: dict[str, object]
-    ) -> None:
-        with self._db.session() as s:
-            s.merge(
-                AgentRunRow(
-                    id=run_id,
-                    tenant_id=current_tenant_id(),
-                    alert_id=alert_id,
-                    final_state=final_state,
-                    payload=payload,
-                )
-            )
-
-
 class AssetRepository:
     def __init__(self, db: Database) -> None:
         self._db = db
@@ -395,5 +375,4 @@ class UnitOfWork:
         self.audit = AuditRepository(db)
         self.ledger = LedgerRepository(db)
         self.tool_calls = ToolCallRepository(db)
-        self.agent_runs = AgentRunRepository(db)
         self.assets = AssetRepository(db)

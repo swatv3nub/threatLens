@@ -5,7 +5,7 @@ from hmac import compare_digest
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.responses import Response
 
 from threatlens import __version__
@@ -42,9 +42,15 @@ def create_app(
     async def _api_auth(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        public_path = request.url.path == "/api/v1/health"
+        if request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/"):
+            target = "/v1" + request.url.path[len("/api/v1") :]
+            if request.url.query:
+                target += "?" + request.url.query
+            return RedirectResponse(target, status_code=308)
+
+        public_path = request.url.path == "/v1/health"
         principal = Principal(role="admin", authenticated=False)
-        if settings.api_auth_enabled and request.url.path.startswith("/api/v1/") and not public_path:
+        if settings.api_auth_enabled and request.url.path.startswith("/v1/") and not public_path:
             supplied = request.headers.get("X-API-Key")
             authorization = request.headers.get("Authorization", "")
             if supplied is None and authorization.lower().startswith("bearer "):

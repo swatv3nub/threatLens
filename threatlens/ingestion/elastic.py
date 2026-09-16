@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Any
 
-from threatlens.ingestion.base import IngestionError, _first, register_ingestor
+from threatlens.ingestion.base import (
+    IngestionError,
+    _first,
+    parse_timestamp,
+    register_ingestor,
+    safe_int,
+)
 from threatlens.models.alerts import AlertSource, NormalizedAlert, Severity
 
 ELASTIC_SEVERITY = {
@@ -50,15 +55,15 @@ class ElasticIngestor:
 
         return NormalizedAlert(
             source=AlertSource.elastic,
-            timestamp=self._parse_timestamp(source.get("@timestamp") or event.get("created")),
+            timestamp=parse_timestamp(source.get("@timestamp") or event.get("created")),
             rule_id=str(rule.get("id")) if rule.get("id") else None,
             rule_name=_first(rule.get("name"), event.get("action")),
             severity=severity,
             category=_first(rule.get("category"), event.get("category")),
             source_ip=_first(src_net.get("ip"), source.get("source_ip")),
             destination_ip=_first(dst_net.get("ip"), source.get("destination_ip")),
-            source_port=_safe_int(src_net.get("port")),
-            destination_port=_safe_int(dst_net.get("port")),
+            source_port=safe_int(src_net.get("port")),
+            destination_port=safe_int(dst_net.get("port")),
             protocol=_first(network.get("protocol"), source.get("network_protocol")),
             hostname=_first(host.get("hostname"), host.get("name"), source.get("hostname")),
             username=_first(user.get("name"), source.get("username")),
@@ -74,22 +79,5 @@ class ElasticIngestor:
                 "event_kind": event.get("kind"),
             },
         )
-
-    @staticmethod
-    def _parse_timestamp(value: Any) -> datetime:
-        if isinstance(value, str):
-            try:
-                return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except ValueError:
-                pass
-        return datetime.now(UTC)
-
-
-def _safe_int(value: Any) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None
-
 
 register_ingestor(ElasticIngestor())

@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Any
 
-from threatlens.ingestion.base import IngestionError, _first, register_ingestor
+from threatlens.ingestion.base import (
+    IngestionError,
+    _first,
+    parse_timestamp,
+    register_ingestor,
+    safe_int,
+)
 from threatlens.models.alerts import AlertSource, NormalizedAlert, Severity
 
 WAZUH_LEVEL_TO_SEVERITY = {
@@ -36,7 +41,7 @@ class WazuhIngestor:
         if not isinstance(rule, dict) or not isinstance(data, dict):
             raise IngestionError("wazuh rule/data must be objects")
 
-        timestamp = self._parse_timestamp(raw.get("timestamp"))
+        timestamp = parse_timestamp(raw.get("timestamp"))
         level = rule.get("level")
         try:
             level_int = int(level) if level is not None else None
@@ -62,8 +67,8 @@ class WazuhIngestor:
             category=category,
             source_ip=_first(data.get("srcip"), data.get("src_ip")),
             destination_ip=_first(data.get("dstip"), data.get("dst_ip")),
-            source_port=_safe_int(data.get("srcport")),
-            destination_port=_safe_int(data.get("dstport")),
+            source_port=safe_int(data.get("srcport")),
+            destination_port=safe_int(data.get("dstport")),
             protocol=data.get("protocol"),
             hostname=_first(agent.get("name"), raw.get("hostname")),
             username=_first(data.get("srcuser"), data.get("dstuser")),
@@ -75,22 +80,5 @@ class WazuhIngestor:
             raw_event=raw,
             metadata={"wazuh_level": level_int, "decoder": raw.get("decoder")},
         )
-
-    @staticmethod
-    def _parse_timestamp(value: Any) -> datetime:
-        if isinstance(value, str):
-            try:
-                return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except ValueError:
-                pass
-        return datetime.now(UTC)
-
-
-def _safe_int(value: Any) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None
-
 
 register_ingestor(WazuhIngestor())

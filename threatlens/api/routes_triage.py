@@ -9,7 +9,7 @@ from threatlens.ingestion.base import IngestionError, parse_alert
 from threatlens.models.alerts import NormalizedAlert
 from threatlens.models.triage import TriageResult
 
-router = APIRouter(prefix="/api/v1/triage", tags=["triage"])
+router = APIRouter(prefix="/v1/triage", tags=["triage"])
 
 
 def _to_response(triage: TriageResult) -> TriageResponse:

@@ -100,16 +100,3 @@ class EnrichmentContext(BaseModel):
     tool_errors: list[str] = Field(default_factory=list)
     missing_context: list[str] = Field(default_factory=list)
     degraded: bool = False
-
-    def is_empty(self) -> bool:
-        return not any(
-            [
-                self.ip_reputations,
-                self.domain_reputations,
-                self.file_reputations,
-                self.url_reputations,
-                self.assets,
-                self.history,
-                self.mitre_techniques,
-            ]
-        )

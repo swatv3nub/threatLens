@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Any
 
-from threatlens.ingestion.base import IngestionError, _first, register_ingestor
+from threatlens.ingestion.base import (
+    IngestionError,
+    _first,
+    parse_timestamp,
+    register_ingestor,
+    safe_int,
+)
 from threatlens.models.alerts import AlertSource, NormalizedAlert, Severity
 
 SURICATA_SEVERITY = {
@@ -29,7 +34,7 @@ class SuricataIngestor:
         http = raw.get("http") or {}
         tls = raw.get("tls") or {}
 
-        severity_code = _safe_int(alert.get("severity"))
+        severity_code = safe_int(alert.get("severity"))
         severity = (
             SURICATA_SEVERITY.get(severity_code, Severity.medium)
             if severity_code is not None
@@ -43,15 +48,15 @@ class SuricataIngestor:
 
         return NormalizedAlert(
             source=AlertSource.suricata,
-            timestamp=self._parse_timestamp(raw.get("timestamp")),
+            timestamp=parse_timestamp(raw.get("timestamp")),
             rule_id=str(alert.get("signature_id")) if alert.get("signature_id") else None,
             rule_name=alert.get("signature"),
             severity=severity,
             category=alert.get("category"),
             source_ip=raw.get("src_ip"),
             destination_ip=raw.get("dest_ip"),
-            source_port=_safe_int(raw.get("src_port")),
-            destination_port=_safe_int(raw.get("dest_port")),
+            source_port=safe_int(raw.get("src_port")),
+            destination_port=safe_int(raw.get("dest_port")),
             protocol=_first(raw.get("proto"), raw.get("app_proto")),
             hostname=raw.get("host"),
             url=http.get("url") if isinstance(http, dict) else None,
@@ -63,22 +68,5 @@ class SuricataIngestor:
                 "http_method": http.get("http_method") if isinstance(http, dict) else None,
             },
         )
-
-    @staticmethod
-    def _parse_timestamp(value: Any) -> datetime:
-        if isinstance(value, str):
-            try:
-                return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except ValueError:
-                pass
-        return datetime.now(UTC)
-
-
-def _safe_int(value: Any) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None
-
 
 register_ingestor(SuricataIngestor())

@@ -7,7 +7,7 @@ from threatlens.api.schemas import AlertResponse, AlertSubmission
 from threatlens.container import Container
 from threatlens.ingestion.base import IngestionError, parse_alert
 
-router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
+router = APIRouter(prefix="/v1/alerts", tags=["alerts"])
 
 
 @router.post("", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)

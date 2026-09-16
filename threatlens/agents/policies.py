@@ -22,7 +22,6 @@ class PolicyDecision(BaseModel):
     requires_human_review: bool = True
     escalation_required: bool = False
     adjustments: list[str] = Field(default_factory=list)
-    blocked: bool = False
 
 
 class PolicyEngine:

@@ -18,8 +18,6 @@ class Settings(BaseSettings):
     )
 
     app_env: Literal["development", "staging", "production"] = "development"
-    app_host: str = "127.0.0.1"
-    app_port: int = 8000
     log_level: str = "INFO"
     api_auth_enabled: bool = False
     api_key: SecretStr | None = None
@@ -37,14 +35,12 @@ class Settings(BaseSettings):
     database_auto_create: bool = True
 
     max_tool_calls: int = 10
-    max_agent_retries: int = 2
     max_tool_retries: int = 3
     tool_timeout_seconds: float = 10.0
     rate_limit_per_minute: int = 120
     rate_limit_backend: Literal["memory", "redis"] = "memory"
     redis_url: str | None = None
 
-    enable_pdf_reports: bool = True
     mock_enrichment: bool = True
 
     max_payload_bytes: int = Field(default=1_048_576, ge=1024)

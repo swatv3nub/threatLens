@@ -237,10 +237,9 @@ OTEL_EXPORTER_OTLP_HEADERS=
 threatlens serve
 ```
 
-The existing `/api/v1/metrics` and `/api/v1/metrics/prometheus` endpoints remain
-available. OTLP export adds distributed traces and mirrors counters/histograms to the
-collector. If the extra is absent or the collector is unavailable, local logging and
-metrics continue to work.
+The `/v1/metrics` and `/v1/metrics/prometheus` endpoints are available. OTLP export adds
+distributed traces and mirrors counters/histograms to the collector. If the extra is
+absent or the collector is unavailable, local logging and metrics continue to work.
 
 ### Run the Demo
 ```bash
@@ -269,10 +268,10 @@ threatlens serve
 make dev
 
 # Health check
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/v1/health
 
 # Submit alert for triage
-curl -X POST http://localhost:8000/api/v1/triage \
+curl -X POST http://localhost:8000/v1/triage \
   -H "Content-Type: application/json" \
   -d '{"source": "synthetic", "alert": {...}}'
 ```
@@ -294,7 +293,7 @@ $env:OPENAI_API_KEY="..."
 $env:VIRUSTOTAL_API_KEY="..."
 $env:ABUSEIPDB_API_KEY="..."
 $env:DATABASE_URL="postgresql+psycopg://user:password@db/threatlens"
-$env:THREATLENS_DOMAIN="triage.example.com"
+$env:THREATLENS_DOMAIN="api.triage.example.com"
 docker compose -f docker-compose.production.yml up --build
 ```
 

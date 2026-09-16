@@ -72,8 +72,8 @@ executed; nothing is fabricated.
 Structured JSON logs carry `request_id`, `alert_id`, `triage_id`, and `agent_run_id`.
 Every state transition, tool call, and policy decision is logged and audited. Metrics
 cover triage latency, tool latency, tool errors, agent failures, alerts processed, and
-classification/severity distributions, exposed at `/api/v1/metrics` and
-`/api/v1/metrics/prometheus`. Optional OpenTelemetry OTLP export is enabled with
+classification/severity distributions, exposed at `/v1/metrics` and
+`/v1/metrics/prometheus`. Optional OpenTelemetry OTLP export is enabled with
 `OTEL_ENABLED=true` after installing `.[otel]`; it exports traces and mirrors the
 existing counters/histograms without removing the local endpoints.
 

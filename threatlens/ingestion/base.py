@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any, Protocol, runtime_checkable
 
 from threatlens.models.alerts import AlertSource, NormalizedAlert
@@ -40,3 +41,19 @@ def _first(*values: Any) -> Any:
         if v not in (None, "", [], {}):
             return v
     return None
+
+
+def parse_timestamp(value: Any) -> datetime:
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            pass
+    return datetime.now(UTC)
+
+
+def safe_int(value: Any) -> int | None:
+    try:
+        return int(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None

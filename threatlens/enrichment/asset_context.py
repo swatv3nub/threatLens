@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any
 
 from threatlens.enrichment.base import BaseTool, ToolContext, ToolResult, ToolStatus
@@ -121,13 +119,6 @@ DEFAULT_INVENTORY: list[dict[str, Any]] = [
         "operating_system": "Rocky Linux 9",
     },
 ]
-
-
-def load_inventory(path: str | Path) -> list[dict[str, Any]]:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(data, list):
-        raise ValueError("asset inventory must be a JSON list")
-    return data
 
 
 class AssetContextTool(BaseTool):

@@ -12,7 +12,6 @@ from threatlens.security.validation import (
     is_valid_hash,
     is_valid_hostname,
     is_valid_ip,
-    is_valid_sha256_or_md5,
 )
 
 
@@ -104,22 +103,3 @@ class NormalizedAlert(BaseModel):
         if not is_valid_hostname(v):
             raise ValueError(f"invalid hostname: {v!r}")
         return v
-
-    def indicators(self) -> dict[str, Any]:
-        return {
-            "source_ip": self.source_ip,
-            "destination_ip": self.destination_ip,
-            "domain": self.domain,
-            "url": self.url,
-            "file_hash": self.file_hash,
-            "hostname": self.hostname,
-            "username": self.username,
-            "process_name": self.process_name,
-            "command_line": self.command_line,
-        }
-
-    def has_network_indicator(self) -> bool:
-        return bool(self.source_ip or self.destination_ip)
-
-    def is_hash_valid(self) -> bool:
-        return bool(self.file_hash and is_valid_sha256_or_md5(self.file_hash))

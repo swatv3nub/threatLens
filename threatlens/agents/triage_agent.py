@@ -46,10 +46,6 @@ class TriageState:
     injection_flagged: bool = False
     errors: list[str] = field(default_factory=list)
 
-    def evidence_ids(self) -> list[str]:
-        return self.evidence_bundle.ids()
-
-
 class TriageAgent:
     def __init__(
         self,

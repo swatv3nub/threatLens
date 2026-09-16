@@ -4,7 +4,6 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from uuid import uuid4
 
 from threatlens.observability.logging import get_logger, log_event
@@ -16,7 +15,6 @@ logger = get_logger("threatlens.trace")
 @dataclass
 class Span:
     name: str
-    span_id: str = field(default_factory=lambda: uuid4().hex[:12])
     started_at: float = field(default_factory=time.monotonic)
     attributes: dict[str, object] = field(default_factory=dict)
     duration_ms: float = 0.0
@@ -29,7 +27,6 @@ class Span:
 class Trace:
     trace_id: str = field(default_factory=lambda: uuid4().hex)
     spans: list[Span] = field(default_factory=list)
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     @asynccontextmanager
     async def span(self, name: str, **attributes: object) -> AsyncIterator[Span]:
@@ -51,6 +48,3 @@ class Trace:
                 duration_ms=round(s.duration_ms, 2),
                 **attributes,
             )
-
-    def total_duration_ms(self) -> float:
-        return sum(s.duration_ms for s in self.spans)
