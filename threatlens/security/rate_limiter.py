@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from collections import deque
 from threading import Lock
-from typing import Protocol
+from typing import Protocol, cast
 
 
 class RateLimitExceeded(Exception):
@@ -74,7 +74,7 @@ class RedisRateLimiter:
 
     def check(self, key: str) -> None:
         bucket = f"threatlens:rate:{key}:{int(time.time()) // self._window}"
-        count = int(self._client.incr(bucket))
+        count = cast(int, self._client.incr(bucket))
         if count == 1:
             self._client.expire(bucket, self._window + 1)
         if count > self._limit:

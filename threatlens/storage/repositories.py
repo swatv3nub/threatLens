@@ -16,6 +16,7 @@ from threatlens.storage.models import (
     AssetRow,
     AuditEventRow,
     EvidenceRow,
+    LedgerEntryRow,
     ToolCallRow,
     TriageRow,
 )
@@ -212,6 +213,72 @@ class AuditRepository:
             ]
 
 
+class LedgerRepository:
+    def __init__(self, db: Database) -> None:
+        self._db = db
+
+    def save(self, event: AuditEvent) -> None:
+        if event.alert_id is None:
+            return
+        with self._db.session() as s:
+            tenant = current_tenant_id()
+            last = s.execute(
+                select(LedgerEntryRow.sequence)
+                .where(LedgerEntryRow.alert_id == event.alert_id)
+                .where(LedgerEntryRow.tenant_id == tenant)
+                .order_by(LedgerEntryRow.sequence.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+            s.add(
+                LedgerEntryRow(
+                    id=event.id,
+                    tenant_id=tenant,
+                    alert_id=event.alert_id,
+                    triage_id=event.triage_id,
+                    agent_run_id=event.agent_run_id,
+                    sequence=(last or 0) + 1,
+                    step_type=event.event_type,
+                    payload=event.redacted_detail(),
+                    timestamp=event.timestamp,
+                )
+            )
+
+    def for_triage(self, triage_id: str, *, limit: int = 500) -> list[dict[str, object]]:
+        tenant = current_tenant_id()
+        triage_stmt = select(TriageRow.alert_id).where(TriageRow.triage_id == triage_id)
+        if tenant is not None:
+            triage_stmt = triage_stmt.where(TriageRow.tenant_id == tenant)
+        with self._db.session() as s:
+            alert_id = s.execute(triage_stmt).scalar_one_or_none()
+            if alert_id is None:
+                ledger_link = select(LedgerEntryRow.alert_id).where(
+                    LedgerEntryRow.triage_id == triage_id
+                )
+                if tenant is not None:
+                    ledger_link = ledger_link.where(LedgerEntryRow.tenant_id == tenant)
+                alert_id = s.execute(ledger_link.limit(1)).scalar_one_or_none()
+            if alert_id is None:
+                return []
+            stmt = select(LedgerEntryRow).where(LedgerEntryRow.alert_id == alert_id)
+            if tenant is not None:
+                stmt = stmt.where(LedgerEntryRow.tenant_id == tenant)
+            stmt = stmt.order_by(LedgerEntryRow.sequence.asc()).limit(limit)
+            rows = s.execute(stmt).scalars().all()
+            return [
+                {
+                    "id": row.id,
+                    "sequence": row.sequence,
+                    "step_type": row.step_type,
+                    "alert_id": row.alert_id,
+                    "triage_id": row.triage_id,
+                    "agent_run_id": row.agent_run_id,
+                    "timestamp": row.timestamp.isoformat(),
+                    "payload": row.payload,
+                }
+                for row in rows
+            ]
+
+
 class ToolCallRepository:
     def __init__(self, db: Database) -> None:
         self._db = db
@@ -326,6 +393,7 @@ class UnitOfWork:
         self.triage = TriageRepository(db)
         self.evidence = EvidenceRepository(db)
         self.audit = AuditRepository(db)
+        self.ledger = LedgerRepository(db)
         self.tool_calls = ToolCallRepository(db)
         self.agent_runs = AgentRunRepository(db)
         self.assets = AssetRepository(db)

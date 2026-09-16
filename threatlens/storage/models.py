@@ -103,6 +103,20 @@ class AuditEventRow(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class LedgerEntryRow(Base):
+    __tablename__ = "investigation_ledger"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    alert_id: Mapped[str] = mapped_column(String(64), index=True)
+    triage_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    agent_run_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    sequence: Mapped[int] = mapped_column(Integer, index=True)
+    step_type: Mapped[str] = mapped_column(String(64), index=True)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class AssetRow(Base):
     __tablename__ = "assets"
 

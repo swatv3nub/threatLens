@@ -35,3 +35,17 @@ async def test_registry_persists_tool_calls(settings) -> None:
     assert len(calls) == 1
     assert calls[0]["tool_name"] == "mitre_attack"
     assert calls[0]["success"] is True
+
+
+@pytest.mark.asyncio
+async def test_triage_persists_ordered_investigation_ledger(settings) -> None:
+    container = Container(settings)
+    alert = NormalizedAlert(source="synthetic", severity="low")
+    result = await container.agent.run(alert)
+
+    entries = container.uow.ledger.for_triage(result.triage_id)
+
+    assert entries
+    assert [entry["sequence"] for entry in entries] == list(range(1, len(entries) + 1))
+    assert entries[0]["step_type"] == "investigation_started"
+    assert entries[-1]["step_type"] == "triage_completed"

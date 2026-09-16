@@ -43,7 +43,7 @@ class Container:
             self.database.create_all()
         self.uow = UnitOfWork(self.database)
         self.allowlist = Allowlist.from_settings(self.settings)
-        self.audit = AuditLog(persist=self.uow.audit.save)
+        self.audit = AuditLog(persist=self._persist_audit_event)
         self.registry = ToolRegistry(
             max_retries=self.settings.max_tool_retries,
             timeout_seconds=self.settings.tool_timeout_seconds,
@@ -99,6 +99,14 @@ class Container:
             latency_ms=call.latency_ms,
             result_summary=call.result_summary,
         )
+
+    def _persist_audit_event(self, event: object) -> None:
+        from threatlens.security.audit import AuditEvent
+
+        if not isinstance(event, AuditEvent):
+            return
+        self.uow.audit.save(event)
+        self.uow.ledger.save(event)
 
 
 @lru_cache(maxsize=1)

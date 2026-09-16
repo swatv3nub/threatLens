@@ -71,6 +71,67 @@ def test_api_key_authentication_can_protect_api(tmp_path) -> None:
     assert response.status_code == 201
 
 
+def test_triage_ledger_is_readable_and_redacted(tmp_path) -> None:
+    settings = Settings(
+        app_env="development",
+        llm_provider="mock",
+        mock_enrichment=True,
+        database_url=f"sqlite:///{(tmp_path / 'ledger.db').as_posix()}",
+        api_auth_enabled=True,
+        api_key="test-key",
+    )
+    client = TestClient(create_app(settings=settings))
+    response = client.post(
+        "/api/v1/triage",
+        headers={"X-API-Key": "test-key"},
+        json={"source": "synthetic", "alert": {"id": "ledger-alert", "severity": "low"}},
+    )
+    assert response.status_code == 201
+    triage_id = response.json()["triage_id"]
+
+    ledger = client.get(
+        f"/api/v1/triage/{triage_id}/ledger", headers={"X-API-Key": "test-key"}
+    )
+    assert ledger.status_code == 200
+    body = ledger.json()
+    assert body["triage_id"] == triage_id
+    assert any(entry["step_type"] == "investigation_started" for entry in body["entries"])
+    assert body["entries"][-1]["step_type"] == "triage_completed"
+    assert all("api_key" not in str(entry) for entry in body["entries"])
+
+
+def test_triage_ledger_is_tenant_scoped(tmp_path) -> None:
+    database_url = f"sqlite:///{(tmp_path / 'ledger-tenants.db').as_posix()}"
+    analyst = Settings(
+        app_env="development",
+        llm_provider="mock",
+        mock_enrichment=True,
+        database_url=database_url,
+        api_auth_enabled=True,
+        api_clients={"analyst-a": {"role": "analyst", "tenant_id": "tenant-a"}},
+    )
+    viewer = Settings(
+        app_env="development",
+        llm_provider="mock",
+        mock_enrichment=True,
+        database_url=database_url,
+        api_auth_enabled=True,
+        api_clients={"viewer-b": {"role": "viewer", "tenant_id": "tenant-b"}},
+    )
+    client_a = TestClient(create_app(settings=analyst))
+    client_b = TestClient(create_app(settings=viewer))
+    created = client_a.post(
+        "/api/v1/triage",
+        headers={"X-API-Key": "analyst-a"},
+        json={"source": "synthetic", "alert": {"id": "tenant-ledger", "severity": "low"}},
+    )
+    triage_id = created.json()["triage_id"]
+
+    assert client_b.get(
+        f"/api/v1/triage/{triage_id}/ledger", headers={"X-API-Key": "viewer-b"}
+    ).status_code == 404
+
+
 def test_rbac_and_tenant_isolation(tmp_path) -> None:
     database_url = f"sqlite:///{(tmp_path / 'tenants.db').as_posix()}"
     tenant_a = Settings(

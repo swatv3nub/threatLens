@@ -16,3 +16,4 @@ htmlcov/
 dist/
 build/
 .vscode/
+x_docs/

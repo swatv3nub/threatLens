@@ -74,6 +74,14 @@ class TriageAgent:
         METRICS.increment("alerts_processed_total")
         start = time.monotonic()
 
+        self._audit.emit(
+            "investigation_started",
+            alert_id=alert.id,
+            triage_id=state.triage_id,
+            agent_run_id=state.agent_run_id,
+            detail={"source": alert.source.value},
+        )
+
         run_budget = ToolBudget(self._tool_budget())
         self._enrichment.set_budget(run_budget)
 
@@ -118,6 +126,16 @@ class TriageAgent:
             machine.transition(AgentState.EVIDENCE_VALIDATION)
 
         state.evidence_bundle = self._reasoning.build_evidence(alert, state.enrichment)
+        self._audit.emit(
+            "evidence_built",
+            alert_id=alert.id,
+            triage_id=state.triage_id,
+            agent_run_id=state.agent_run_id,
+            detail={
+                "evidence_ids": state.evidence_bundle.ids(),
+                "evidence_count": len(state.evidence_bundle.evidence),
+            },
+        )
 
         async with trace.span("reasoning", alert_id=alert.id):
             try:
@@ -125,6 +143,17 @@ class TriageAgent:
                     alert, state.enrichment, bundle=state.evidence_bundle
                 )
                 state.reasoning = reasoning
+                self._audit.emit(
+                    "reasoning_completed",
+                    alert_id=alert.id,
+                    triage_id=state.triage_id,
+                    agent_run_id=state.agent_run_id,
+                    detail={
+                        "model_confidence": reasoning.model_confidence,
+                        "confidence": reasoning.confidence,
+                        "evidence_ids": [e.evidence_id for e in reasoning.evidence],
+                    },
+                )
             except Exception as exc:
                 state.errors.append(f"reasoning: {exc}")
                 state.reasoning = deterministic_fallback(alert)
@@ -143,6 +172,18 @@ class TriageAgent:
             alert=alert, enrichment=state.enrichment, reasoning=reasoning
         )
         state.policy_adjustments = decision.adjustments
+        self._audit.emit(
+            "policy_decision",
+            alert_id=alert.id,
+            triage_id=state.triage_id,
+            agent_run_id=state.agent_run_id,
+            detail={
+                "classification": decision.classification.value,
+                "severity": decision.severity.value,
+                "requires_human_review": decision.requires_human_review,
+                "adjustments": decision.adjustments,
+            },
+        )
 
         if decision.requires_human_review:
             state.requires_human_review = True

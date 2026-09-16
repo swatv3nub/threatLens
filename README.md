@@ -206,6 +206,23 @@ API_CLIENTS={"tenant-a-analyst":{"role":"analyst","tenant_id":"tenant-a"},"tenan
 read metrics and administer all tenants. Tenant-scoped records are filtered in the
 repository layer.
 
+### Database Migrations
+
+Apply migrations before using an existing local database, especially after pulling
+changes that add or alter stored fields:
+
+```bash
+alembic upgrade head
+```
+
+This preserves existing data and brings SQLite or PostgreSQL to the current schema.
+For a fresh development database, the same command is safe to run before starting
+the API. Check the migration status with:
+
+```bash
+alembic current
+```
+
 ### OpenTelemetry Export
 
 OpenTelemetry is optional and disabled by default. Install the extra and configure an

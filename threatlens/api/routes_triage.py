@@ -92,3 +92,20 @@ async def get_triage(
             status_code=status.HTTP_404_NOT_FOUND, detail="triage not found"
         )
     return _to_response(triage)
+
+
+@router.get("/{triage_id}/ledger")
+async def get_triage_ledger(
+    triage_id: str,
+    limit: int = 500,
+    container: Container = Depends(get_container_dep),
+    _: None = Depends(require_role("viewer")),
+) -> dict[str, object]:
+    if limit < 1 or limit > 5000:
+        raise HTTPException(status_code=400, detail="limit must be between 1 and 5000")
+    if container.uow.triage.get(triage_id) is None:
+        raise HTTPException(status_code=404, detail="triage not found")
+    return {
+        "triage_id": triage_id,
+        "entries": container.uow.ledger.for_triage(triage_id, limit=limit),
+    }
