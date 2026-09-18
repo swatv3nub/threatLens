@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     virustotal_api_key: str | None = None
     abuseipdb_api_key: str | None = None
 
+    reconix_cloud_base_url: str = ""
+    reconix_cloud_api_key: SecretStr | None = None
+    reconix_cloud_connect_timeout_seconds: float = Field(default=5.0, gt=0)
+    reconix_cloud_read_timeout_seconds: float = Field(default=30.0, gt=0)
+
     database_url: str = "sqlite:///./threatlens.db"
     database_auto_create: bool = True
 

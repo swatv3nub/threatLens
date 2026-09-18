@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "scan_port",
+  "target": "203.0.113.10",
+  "findings": [
+    {
+      "finding_id": "finding_port_01",
+      "source": "reconix",
+      "type": "port",
+      "title": "Open port observation",
+      "severity": "medium",
+      "asset": {"ip": "203.0.113.10"},
+      "evidence": {"port": 443, "state": "open", "protocol": "tcp"},
+      "metadata": {"category": "port"}
+    }
+  ]
+}

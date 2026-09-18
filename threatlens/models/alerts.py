@@ -41,6 +41,7 @@ class AlertSource(str, Enum):
     suricata = "suricata"
     elastic = "elastic"
     synthetic = "synthetic"
+    reconix_cloud = "reconix_cloud"
 
 
 class NormalizedAlert(BaseModel):

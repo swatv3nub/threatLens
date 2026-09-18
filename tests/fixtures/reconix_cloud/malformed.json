@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "scan_bad",
+  "target": "example.com",
+  "findings": [{"finding_id": "missing-fields"}]
+}

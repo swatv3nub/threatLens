@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "scan_dns",
+  "target": "example.com",
+  "findings": [
+    {
+      "finding_id": "finding_dns_01",
+      "source": "reconix",
+      "type": "dns",
+      "title": "DNS observation",
+      "severity": "informational",
+      "asset": {"domain": "example.com"},
+      "evidence": {"name": "example.com", "record_type": "A"},
+      "metadata": {"category": "dns"}
+    }
+  ]
+}

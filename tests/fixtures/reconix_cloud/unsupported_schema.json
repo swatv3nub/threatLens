@@ -1,0 +1,6 @@
+{
+  "schema_version": "2.0",
+  "scan_id": "scan_v2",
+  "target": "example.com",
+  "findings": []
+}

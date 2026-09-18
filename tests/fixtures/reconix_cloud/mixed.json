@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "scan_mixed",
+  "target": "example.com",
+  "findings": [
+    {
+      "finding_id": "finding_mixed_http",
+      "source": "reconix",
+      "type": "http",
+      "title": "HTTP observation",
+      "severity": "low",
+      "evidence": {"url": "https://example.com/", "name": "HTTP"},
+      "metadata": {"category": "web"}
+    },
+    {
+      "finding_id": "finding_mixed_dns",
+      "source": "reconix",
+      "type": "dns",
+      "title": "DNS observation",
+      "severity": "critical",
+      "evidence": {"name": "example.com"},
+      "metadata": {"category": "dns"}
+    },
+    {
+      "finding_id": "finding_mixed_port",
+      "source": "reconix",
+      "type": "port",
+      "title": "Port observation",
+      "severity": "info",
+      "evidence": {"port": 53, "protocol": "udp"},
+      "metadata": {"category": "port"}
+    }
+  ]
+}

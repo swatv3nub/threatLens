@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "scan_id": "scan_minimal",
+  "target": "example.com",
+  "findings": [
+    {
+      "finding_id": "finding_minimal",
+      "source": "reconix",
+      "type": "observation",
+      "title": "Minimal observation",
+      "severity": "low"
+    }
+  ]
+}
