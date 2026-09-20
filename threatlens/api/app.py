@@ -13,6 +13,7 @@ from threatlens.api.dependencies import get_container_dep
 from threatlens.api.routes_alerts import router as alerts_router
 from threatlens.api.routes_health import router as health_router
 from threatlens.api.routes_triage import router as triage_router
+from threatlens.api.routes_ingestion import router as ingestion_router
 from threatlens.config import Settings, get_settings
 from threatlens.container import Container, create_container
 from threatlens.observability.logging import configure_logging, get_logger, request_id_var
@@ -114,5 +115,5 @@ def create_app(
 
     return app
 
-
 app = create_app()
+app.include_router(ingestion_router)

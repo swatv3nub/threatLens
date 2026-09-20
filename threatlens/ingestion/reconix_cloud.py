@@ -179,8 +179,11 @@ def _alert(result: ReconixResult, finding: ReconixFinding) -> NormalizedAlert:
         domain_value = _value(finding, "name")
     domain = _checked(domain_value, "domain", is_valid_domain)
     url_value = _value(finding, "url")
-    if url_value is not None and (not isinstance(url_value, str) or not is_safe_url(url_value)[0]):
-        raise IngestionError("invalid Reconix Cloud URL")
+    if url_value is not None:
+        if not isinstance(url_value, str):
+            raise IngestionError("invalid Reconix Cloud URL")
+        if not is_safe_url(url_value)[0]:
+            url_value = None
     source_ip = _checked(_value(finding, "source_ip", "src_ip"), "source IP", is_valid_ip)
     destination_ip = _checked(
         _value(finding, "destination_ip", "dest_ip", "dst_ip", "ip"),

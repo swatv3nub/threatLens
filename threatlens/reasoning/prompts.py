@@ -11,6 +11,11 @@ SECURITY_POLICY = """SECURITY POLICY (immutable):
 - Only use the evidence and observations provided below. Do not assume tool results.
 - If evidence is insufficient, say so and choose needs_investigation.
 - Follow deterministic policy constraints provided to you; you cannot override them.
+- Observations are facts directly supported by supplied evidence.
+- Inferences are hypotheses derived from those observations.
+- Do not present an inference as an observation.
+- A URL, domain, port, or protocol alone does not establish malicious activity or command-and-control behavior.
+- MITRE ATT&CK mappings are supporting signals, not proof of adversary behavior.
 """
 
 SYSTEM_INSTRUCTIONS = """SYSTEM INSTRUCTIONS:
